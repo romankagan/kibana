@@ -7,8 +7,9 @@
  */
 
 import expect from '@kbn/expect';
-
 import { FtrProviderContext } from '../../ftr_provider_context';
+// @ts-ignore
+import { main } from '../../../utils/fetch_saved_objects';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -18,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const inspector = getService('inspector');
+  const supertest = getService('supertest');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -34,6 +36,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
+    });
+
+    before(async function fetchSavedObjects() {
+      const dest = 'test/functional/fixtures/exported_saved_objects/discover';
+      await main(dest)(log)(supertest);
     });
 
     describe('query', function () {
